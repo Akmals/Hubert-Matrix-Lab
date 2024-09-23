@@ -1,0 +1,86 @@
+import numpy as np
+
+# 1. Generate Hilbert Matrix
+def generate_hilbert_matrix(n):
+    H = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            H[i, j] = 1.0 / (i + j + 1)
+    return H
+
+
+# 2. Gaussian Elimination Without Pivoting
+def gaussian_elimination(H, b):
+    n = len(b)
+    for i in range(n):
+        for j in range(i + 1, n):
+            factor = H[j][i] / H[i][i]
+            for k in range(i, n):
+                H[j][k] -= factor * H[i][k]
+            b[j] -= factor * b[i]
+
+    # Back substitution
+    x = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        x[i] = b[i]
+        for j in range(i + 1, n):
+            x[i] -= H[i][j] * x[j]
+        x[i] /= H[i][i]
+    return x
+
+
+# 3. Error Calculation
+def calculate_error(x, n):
+    exact_solution = np.ones(n)
+    error_vector = exact_solution - x
+    return error_vector
+
+
+def infinity_norm(error_vector):
+    return np.max(np.abs(error_vector))
+
+
+def euclidean_norm(error_vector):
+    return np.linalg.norm(error_vector)
+
+
+# 4. Multiplication Count (Formula-Based)
+def count_multiplications(n):
+    return (((2*n**3) + (3*n**2) - (5*n)) / 6) + (((n**2) + n) / 2)
+
+
+# 5. Main Program to Solve and Display Results
+def main():
+    np.set_printoptions(precision=4, suppress=True)  # Set consistent print options
+    sizes = [11, 12, 13]  # Sizes for Hilbert matrix
+
+    for n in sizes:
+        H = generate_hilbert_matrix(n)
+        b = np.ones(n)  # Vector b with all ones
+
+        # Solve using Gaussian elimination without pivoting
+        x = gaussian_elimination(np.copy(H), np.copy(b))
+
+        print(f"\nFor n = {n}:")
+        print("Exact solution: ", np.ones(n))
+        print("Computed solution: ", np.round(x, 4))
+
+        # Calculate the error vector
+        error_vector = calculate_error(x, n)
+        print("Error vector: ", np.round(error_vector, 4))
+
+        # Calculate infinity and Euclidean norms
+        inf_norm = infinity_norm(error_vector)
+        euc_norm = euclidean_norm(error_vector)
+        print(f"Infinity norm of the error vector: {inf_norm:.4f}")
+        print(f"Euclidean norm of the error vector: {euc_norm:.4f}")
+
+        # Count multiplications
+        multiplications = count_multiplications(n)
+        print(f"Number of multiplications (approx.): {int(multiplications)}")
+
+
+# Run the main function
+if __name__ == "__main__":
+    main()
+
